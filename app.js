@@ -15,8 +15,9 @@ const Storage = {
     }
 };
 
-// ============ 默认词汇数据库 (500+常用词，可扩展至1万) ============
-const defaultVocabulary = [
+// ============ 词汇数据库 ============
+// 使用 EXTENDED_VOCABULARY (10,000+ 词汇) 或默认词汇
+const defaultVocabulary = typeof EXTENDED_VOCABULARY !== 'undefined' ? EXTENDED_VOCABULARY : [
     // 问候语
     { id: 1, korean: '안녕하세요', meaning: '你好', romanization: 'annyeonghaseyo', example: '안녕하세요! 만나서 반가워요.' },
     { id: 2, korean: '감사합니다', meaning: '谢谢', romanization: 'gamsahamnida', example: '도와주셔서 감사합니다.' },
@@ -102,8 +103,29 @@ class SRS {
         this.words = Storage.get('words', {});
         // 加载自定义单词
         this.customWords = Storage.get('customWords', []);
-        // 合并默认词汇和自定义词汇
+        // 合并默认词汇和自定义词汇 (支持10,000+词汇)
         this.allWords = [...defaultVocabulary, ...this.customWords];
+        
+        // 确保所有单词都有category字段
+        this.allWords.forEach((word, index) => {
+            if (!word.category) {
+                // 根据id分配默认类别
+                if (word.id <= 500) word.category = 'basic';
+                else if (word.id <= 1500) word.category = 'daily';
+                else if (word.id <= 2500) word.category = 'food';
+                else if (word.id <= 3500) word.category = 'transport';
+                else if (word.id <= 4500) word.category = 'shopping';
+                else if (word.id <= 5500) word.category = 'business';
+                else if (word.id <= 6500) word.category = 'education';
+                else if (word.id <= 7500) word.category = 'travel';
+                else if (word.id <= 8500) word.category = 'health';
+                else if (word.id <= 9500) word.category = 'entertainment';
+                else word.category = 'emotion';
+            }
+            if (!word.level) word.level = 1;
+        });
+        
+        console.log(`📚 词汇库加载完成: ${this.allWords.length} 个单词`);
     }
     
     // 获取今天的日期字符串 (YYYY-MM-DD)
@@ -280,12 +302,70 @@ let score = 0;
 // ============ 背单词模块 ============
 let reviewQueue = [];
 let currentReviewIndex = 0;
-let reviewMode = 'review'; // 'review' 或 'new'
+let reviewMode = 'review'; // 'review', 'new', 或 'category'
+let selectedCategory = 'all'; // 当前选择的类别
+
+// 词汇类别配置
+const VOCAB_CATEGORIES = {
+    all: { name: '全部词汇', icon: '📚', count: 10000 },
+    basic: { name: '基础必备', icon: '⭐', count: 500 },
+    daily: { name: '日常生活', icon: '🏠', count: 1000 },
+    food: { name: '食物餐饮', icon: '🍜', count: 1000 },
+    transport: { name: '交通出行', icon: '🚇', count: 1000 },
+    shopping: { name: '购物消费', icon: '🛍️', count: 1000 },
+    business: { name: '工作商务', icon: '💼', count: 1000 },
+    education: { name: '学校学习', icon: '📚', count: 1000 },
+    travel: { name: '旅游观光', icon: '✈️', count: 1000 },
+    health: { name: '医疗健康', icon: '🏥', count: 1000 },
+    entertainment: { name: '娱乐休闲', icon: '🎮', count: 1000 },
+    emotion: { name: '情感表达', icon: '❤️', count: 500 }
+};
 
 function initReview() {
     updateReviewStats();
     bindReviewEvents();
+    initCategorySelector();
     loadReviewQueue();
+}
+
+// 初始化类别选择器
+function initCategorySelector() {
+    // 检查是否已存在类别选择器
+    let selector = document.getElementById('category-selector');
+    if (!selector) {
+        // 创建类别选择器
+        selector = document.createElement('div');
+        selector.id = 'category-selector';
+        selector.className = 'category-selector';
+        
+        let html = '<label>选择类别：</label><select id="category-select">';
+        for (const [key, value] of Object.entries(VOCAB_CATEGORIES)) {
+            html += `<option value="${key}">${value.icon} ${value.name} (${value.count}词)</option>`;
+        }
+        html += '</select>';
+        
+        selector.innerHTML = html;
+        
+        // 插入到复习模块头部
+        const reviewHeader = document.querySelector('.review-header');
+        if (reviewHeader) {
+            reviewHeader.after(selector);
+        }
+        
+        // 绑定事件
+        document.getElementById('category-select').addEventListener('change', (e) => {
+            selectedCategory = e.target.value;
+            loadReviewQueue();
+        });
+    }
+}
+
+// 根据类别获取词汇
+function getWordsByCategory(category) {
+    if (category === 'all') {
+        return srs.allWords;
+    }
+    return srs.allWords.filter(word => word.category === category);
 }
 
 function updateReviewStats() {
@@ -345,9 +425,16 @@ function switchMode(mode) {
 
 function loadReviewQueue() {
     if (reviewMode === 'review') {
-        reviewQueue = srs.getDueWords();
-    } else {
-        reviewQueue = srs.getNewWords(20);
+        // 获取指定类别的到期单词
+        const dueWords = srs.getDueWords();
+        reviewQueue = selectedCategory === 'all' 
+            ? dueWords 
+            : dueWords.filter(word => word.category === selectedCategory);
+    } else if (reviewMode === 'new') {
+        // 获取指定类别的新单词
+        const categoryWords = getWordsByCategory(selectedCategory);
+        const newWords = categoryWords.filter(word => !srs.words[word.id]);
+        reviewQueue = newWords.slice(0, 20);
     }
     
     currentReviewIndex = 0;
