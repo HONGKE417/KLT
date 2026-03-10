@@ -514,8 +514,8 @@ function bindReviewEvents() {
         });
     });
     
-    // 添加单词
-    document.getElementById('submit-word').addEventListener('click', addCustomWord);
+    // 单词浏览器事件
+    initWordBrowser();
     
     // 继续学习
     document.getElementById('continue-study').addEventListener('click', () => {
