@@ -730,101 +730,51 @@ function initQuiz() {
 }
 
 // ============ 音频系统 ============
-// 韩语字母名称映射（用于朗读）
-const koreanLetterNames = {
-    // 辅音名称
-    'ㄱ': '기역', 'ㄴ': '니은', 'ㄷ': '디귿', 'ㄹ': '리을', 'ㅁ': '미음',
-    'ㅂ': '비읍', 'ㅅ': '시옷', 'ㅇ': '이응', 'ㅈ': '지읒', 'ㅊ': '치읓',
-    'ㅋ': '키읔', 'ㅌ': '티읕', 'ㅍ': '피읖', 'ㅎ': '히읗',
-    // 元音名称（直接读即可）
-    'ㅏ': '아', 'ㅑ': '야', 'ㅓ': '어', 'ㅕ': '여', 'ㅗ': '오',
-    'ㅛ': '요', 'ㅜ': '우', 'ㅠ': '유', 'ㅡ': '으', 'ㅣ': '이',
-    'ㅐ': '애', 'ㅒ': '얘', 'ㅔ': '에', 'ㅖ': '예',
-    'ㅘ': '와', 'ㅙ': '왜', 'ㅚ': '외', 'ㅝ': '워', 'ㅞ': '웨', 'ㅟ': '위', 'ㅢ': '의'
-};
+// 使用 Google Translate TTS 获取标准韩语发音
 
-// 韩语发音提示（当语音不可用时显示）
+// 发音提示表
 const pronunciationTips = {
-    'ㄱ': 'g (轻读)', 'ㄴ': 'n', 'ㄷ': 'd', 'ㄹ': 'r/l', 'ㅁ': 'm',
-    'ㅂ': 'b', 'ㅅ': 's', 'ㅇ': 'ng/无声', 'ㅈ': 'j', 'ㅊ': 'ch',
-    'ㅋ': 'k', 'ㅌ': 't', 'ㅍ': 'p', 'ㅎ': 'h',
-    'ㅏ': 'a', 'ㅑ': 'ya', 'ㅓ': 'eo', 'ㅕ': 'yeo', 'ㅗ': 'o',
-    'ㅛ': 'yo', 'ㅜ': 'u', 'ㅠ': 'yu', 'ㅡ': 'eu', 'ㅣ': 'i',
-    'ㅐ': 'ae', 'ㅒ': 'yae', 'ㅔ': 'e', 'ㅖ': 'ye',
-    'ㅘ': 'wa', 'ㅙ': 'wae', 'ㅚ': 'oe', 'ㅝ': 'wo', 'ㅞ': 'we', 'ㅟ': 'wi', 'ㅢ': 'ui'
+    'ㄱ': 'g (如 "哥")', 'ㄴ': 'n (如 "呢")', 'ㄷ': 'd (如 "得")', 'ㄹ': 'r/l (如 "了")', 'ㅁ': 'm (如 "么")',
+    'ㅂ': 'b (如 "波")', 'ㅅ': 's (如 "思")', 'ㅇ': '无声/ng', 'ㅈ': 'j (如 "资")', 'ㅊ': 'ch (如 "吃")',
+    'ㅋ': 'k (如 "科")', 'ㅌ': 't (如 "特")', 'ㅍ': 'p (如 "坡")', 'ㅎ': 'h (如 "喝")',
+    'ㅏ': 'a (如 "啊")', 'ㅑ': 'ya (如 "呀")', 'ㅓ': 'eo (如 "哦")', 'ㅕ': 'yeo (如 "哟")', 'ㅗ': 'o (如 "哦")',
+    'ㅛ': 'yo (如 "哟")', 'ㅜ': 'u (如 "乌")', 'ㅠ': 'yu (如 "迂")', 'ㅡ': 'eu (如 "呃")', 'ㅣ': 'i (如 "衣")',
+    'ㅐ': 'ae (如 "爱")', 'ㅒ': 'yae (如 "椰")', 'ㅔ': 'e (如 "诶")', 'ㅖ': 'ye (如 "耶")',
+    'ㅘ': 'wa (如 "哇")', 'ㅙ': 'wae (如 "歪")', 'ㅚ': 'oe (如 "喂")', 'ㅝ': 'wo (如 "窝")', 'ㅞ': 'we (如 "威")', 'ㅟ': 'wi (如 "威")', 'ㅢ': 'ui (如 "喂")'
 };
 
-// 存储可用的韩语语音
-let koreanVoiceCache = null;
+// 当前播放的音频
+let currentAudio = null;
 
-// 预加载语音列表
-function loadVoices() {
-    const voices = speechSynthesis.getVoices();
-    // 优先找韩语语音
-    koreanVoiceCache = voices.find(v => v.lang === 'ko-KR') || 
-                       voices.find(v => v.lang.includes('ko')) ||
-                       voices.find(v => v.name.toLowerCase().includes('korean'));
-    
-    if (koreanVoiceCache) {
-        console.log('✓ 找到韩语语音:', koreanVoiceCache.name);
-    } else {
-        console.log('⚠ 未找到韩语语音，可用语音:', voices.map(v => `${v.name}(${v.lang})`).slice(0, 5));
+// 使用 Google Translate TTS 播放韩语
+function playGoogleTTS(text) {
+    // 停止之前的音频
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
     }
-}
-
-// 浏览器加载语音是异步的，需要监听
-if (typeof speechSynthesis !== 'undefined') {
-    speechSynthesis.onvoiceschanged = loadVoices;
-    // 立即尝试加载
-    setTimeout(loadVoices, 100);
-}
-
-// 获取韩语语音（确保使用韩语）
-function getKoreanVoice() {
-    return koreanVoiceCache;
-}
-
-// 播放韩语音频（用于字母表和单词）
-function playKoreanAudio(text, showTip = true) {
-    if (!('speechSynthesis' in window)) {
-        console.log('TTS not supported');
+    
+    // 构建 Google TTS URL
+    const encodedText = encodeURIComponent(text);
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodedText}&tl=ko&client=tw-ob`;
+    
+    currentAudio = new Audio(url);
+    currentAudio.play().catch(err => {
+        console.log('音频播放失败:', err);
         showPronunciationTip(text);
-        return;
+    });
+}
+
+// 播放韩语音频
+function playKoreanAudio(text, showTip = true) {
+    // 如果是单个字母，直接播放字母本身（不是名称）
+    // Google TTS 会直接读这个字母的发音
+    playGoogleTTS(text);
+    
+    // 同时显示发音提示
+    if (showTip && pronunciationTips[text]) {
+        setTimeout(() => showPronunciationTip(text), 100);
     }
-    
-    // 取消之前的朗读
-    speechSynthesis.cancel();
-    
-    // 如果是单个字母，使用字母名称（如 'ㄱ' -> '기역'）
-    const letterName = koreanLetterNames[text];
-    
-    // 如果是单个字母且有对应名称，使用名称；否则使用原文
-    let utterText;
-    if (letterName) {
-        utterText = letterName; // 使用韩语名称，如 '기역'
-    } else {
-        utterText = text; // 使用原文
-    }
-    
-    const utterance = new SpeechSynthesisUtterance(utterText);
-    const koreanVoice = getKoreanVoice();
-    
-    if (koreanVoice) {
-        utterance.voice = koreanVoice;
-        utterance.lang = 'ko-KR';
-    } else {
-        // 没有韩语语音，显示发音提示
-        if (showTip && letterName) {
-            showPronunciationTip(text);
-            return; // 没有韩语语音就不读了，只显示提示
-        }
-        utterance.lang = 'ko-KR';
-    }
-    
-    utterance.rate = 0.7;
-    utterance.pitch = 1;
-    
-    speechSynthesis.speak(utterance);
 }
 
 // 显示发音提示
@@ -837,16 +787,16 @@ function showPronunciationTip(char) {
     if (!tipEl) {
         tipEl = document.createElement('div');
         tipEl.id = 'pronunciation-tip';
-        tipEl.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#667eea;color:white;padding:15px 30px;border-radius:10px;font-size:1.2rem;z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.3);';
+        tipEl.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;padding:20px 40px;border-radius:15px;font-size:1.5rem;z-index:9999;box-shadow:0 8px 30px rgba(0,0,0,0.3);text-align:center;';
         document.body.appendChild(tipEl);
     }
     
-    tipEl.textContent = `${char} → [${tip}]`;
+    tipEl.innerHTML = `<div style="font-size:2rem;margin-bottom:5px;">${char}</div><div style="font-size:1rem;opacity:0.9;">[${tip}]</div>`;
     tipEl.style.display = 'block';
     
     setTimeout(() => {
         tipEl.style.display = 'none';
-    }, 1500);
+    }, 2000);
 }
 
 // 兼容旧接口
