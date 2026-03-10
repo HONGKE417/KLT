@@ -795,9 +795,16 @@ function playKoreanAudio(text, showTip = true) {
     // 取消之前的朗读
     speechSynthesis.cancel();
     
-    // 如果是单个字母，使用字母名称
+    // 如果是单个字母，使用字母名称（如 'ㄱ' -> '기역'）
     const letterName = koreanLetterNames[text];
-    const utterText = letterName || text;
+    
+    // 如果是单个字母且有对应名称，使用名称；否则使用原文
+    let utterText;
+    if (letterName) {
+        utterText = letterName; // 使用韩语名称，如 '기역'
+    } else {
+        utterText = text; // 使用原文
+    }
     
     const utterance = new SpeechSynthesisUtterance(utterText);
     const koreanVoice = getKoreanVoice();
@@ -807,13 +814,14 @@ function playKoreanAudio(text, showTip = true) {
         utterance.lang = 'ko-KR';
     } else {
         // 没有韩语语音，显示发音提示
-        if (showTip) {
+        if (showTip && letterName) {
             showPronunciationTip(text);
+            return; // 没有韩语语音就不读了，只显示提示
         }
-        utterance.lang = 'ko-KR'; // 仍然尝试用韩语模式
+        utterance.lang = 'ko-KR';
     }
     
-    utterance.rate = 0.6; // 更慢，更清晰
+    utterance.rate = 0.7;
     utterance.pitch = 1;
     
     speechSynthesis.speak(utterance);
