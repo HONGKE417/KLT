@@ -66,13 +66,42 @@
                         <span id="due-count">待复习: 0</span>
                         <span id="new-count">新词: 0</span>
                         <span id="total-count">总词汇: 0</span>
+                        <span id="streak-count">🔥 0天</span>
                     </div>
+                </div>
+
+                <!-- 学习统计面板 -->
+                <div class="stats-panel" id="stats-panel">
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-mastered">0</div>
+                        <div class="stat-label">已掌握</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-learning">0</div>
+                        <div class="stat-label">学习中</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-today">0</div>
+                        <div class="stat-label">今日学习</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="stat-accuracy">0%</div>
+                        <div class="stat-label">正确率</div>
+                    </div>
+                </div>
+
+                <!-- 每日目标设置 -->
+                <div class="daily-goal" id="daily-goal">
+                    <span>📅 每日目标: <strong id="goal-display">20</strong> 词</span>
+                    <input type="range" id="goal-slider" min="5" max="50" value="20" />
+                    <button id="reset-progress" class="reset-btn">🗑️ 重置进度</button>
                 </div>
                 
                 <div class="review-mode-selector">
                     <button id="mode-review" class="mode-btn active">📚 今日复习</button>
                     <button id="mode-new" class="mode-btn">🆕 学习新词</button>
                     <button id="mode-add" class="mode-btn">➕ 添加单词</button>
+                    <button id="mode-stats" class="mode-btn">📊 统计</button>
                 </div>
 
                 <!-- 复习界面 -->
@@ -80,16 +109,31 @@
                     <div class="progress-bar">
                         <div id="review-progress" class="progress-fill"></div>
                     </div>
+                    <div class="batch-info" id="batch-info">
+                        <span id="current-pos">1</span> / <span id="total-pos">20</span>
+                    </div>
                     <div class="word-card" id="study-card">
                         <div class="word-front">
                             <span class="word-korean" id="study-korean">안녕하세요</span>
+                            <button class="audio-btn" id="play-word-audio" title="播放发音">🔊</button>
                             <button class="hint-btn" id="show-hint">💡 提示</button>
                             <div class="word-hint" id="study-hint" style="display:none;">an-nyeong-ha-se-yo</div>
+                            <span class="word-category-tag" id="word-cat">基础必备</span>
                         </div>
                         <div class="word-back" id="word-answer" style="display:none;">
                             <span class="word-meaning" id="study-meaning">你好</span>
                             <span class="word-roman" id="study-roman">annyeonghaseyo</span>
                             <span class="word-example" id="study-example">안녕하세요! 만나서 반가워요.</span>
+                            <div class="mastery-indicator" id="mastery-indicator">
+                                <span class="mastery-label">掌握度:</span>
+                                <div class="mastery-bars">
+                                    <div class="mastery-bar" data-level="1"></div>
+                                    <div class="mastery-bar" data-level="2"></div>
+                                    <div class="mastery-bar" data-level="3"></div>
+                                    <div class="mastery-bar" data-level="4"></div>
+                                    <div class="mastery-bar" data-level="5"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="difficulty-buttons" id="difficulty-btns" style="display:none;">
@@ -112,10 +156,38 @@
                     <div id="add-feedback"></div>
                 </div>
 
+                <!-- 统计界面 -->
+                <div id="stats-view" class="stats-view" style="display:none;">
+                    <h3>📊 学习统计</h3>
+                    <div class="stats-detail">
+                        <div class="progress-ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle class="progress-bg" cx="50" cy="50" r="45"/>
+                                <circle class="progress-bar" id="progress-circle" cx="50" cy="50" r="45"/>
+                            </svg>
+                            <div class="progress-text">
+                                <span id="progress-percent">0%</span>
+                                <small>已掌握</small>
+                            </div>
+                        </div>
+                        <div class="category-progress" id="category-progress">
+                            <!-- 动态生成各类别进度 -->
+                        </div>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="word-search" placeholder="🔍 搜索已学单词..." />
+                        <div id="search-results"></div>
+                    </div>
+                </div>
+
                 <!-- 完成界面 -->
                 <div id="review-complete" class="complete-message" style="display:none;">
                     <h3>🎉 今日任务完成！</h3>
-                    <p>明天再来复习吧</p>
+                    <p id="completion-message">明天再来复习吧</p>
+                    <div class="completion-stats">
+                        <span>📚 今日学习: <strong id="today-learned">0</strong></span>
+                        <span>🎯 正确率: <strong id="today-accuracy">0%</strong></span>
+                    </div>
                     <button id="continue-study">继续学习新词</button>
                 </div>
             </section>
