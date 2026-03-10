@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLT - Korean Learning Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🇰🇷 KLT</h1>
+            <p>Korean Learning Tool - 韩语学习工具</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="hangul">한글字母</button>
+            <button class="tab-btn" data-tab="vocab">词汇</button>
+            <button class="tab-btn" data-tab="practice">练习</button>
+        </nav>
+
+        <main id="content">
+            <!-- 韩文字母表 -->
+            <section id="hangul" class="tab-content active">
+                <h2>韩文字母表</h2>
+                <div class="alphabet-grid" id="consonants">
+                    <h3>辅音 (Consonants)</h3>
+                    <!-- 由JS动态生成 -->
+                </div>
+                <div class="alphabet-grid" id="vowels">
+                    <h3>元音 (Vowels)</h3>
+                    <!-- 由JS动态生成 -->
+                </div>
+            </section>
+
+            <!-- 词汇学习 -->
+            <section id="vocab" class="tab-content">
+                <h2>常用词汇</h2>
+                <div class="flashcard-container">
+                    <div class="flashcard" id="flashcard">
+                        <div class="card-inner">
+                            <div class="card-front">
+                                <span class="korean">안녕하세요</span>
+                                <button class="play-btn">🔊</button>
+                            </div>
+                            <div class="card-back">
+                                <span class="meaning">你好</span>
+                                <span class="romanization">annyeonghaseyo</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-controls">
+                        <button id="prev-card">←</button>
+                        <span id="card-counter">1/10</span>
+                        <button id="next-card">→</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 练习题 -->
+            <section id="practice" class="tab-content">
+                <h2>练习</h2>
+                <div class="quiz-container">
+                    <div id="question"></div>
+                    <div id="options"></div>
+                    <div id="feedback"></div>
+                    <button id="next-question" style="display: none;">下一题</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Made with ❤️ for Korean learners</p>
+        </footer>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
