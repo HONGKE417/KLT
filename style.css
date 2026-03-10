@@ -969,6 +969,218 @@ header p {
     font-size: 1.2rem;
 }
 
+/* ====== 单词浏览器样式 ====== */
+.word-browser {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.word-browser h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #667eea;
+}
+
+.category-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.category-filter label {
+    font-weight: 500;
+    color: #333;
+}
+
+.category-filter select {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+}
+
+.browser-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.browser-toolbar input {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.add-count {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.add-count select {
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.quick-add-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.word-list-container {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    max-height: 400px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.word-list-header {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.word-list-header strong {
+    color: #667eea;
+}
+
+.word-browser-list {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.browser-word-item {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.browser-word-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.browser-word-item.selected {
+    border-color: #48bb78;
+    background: #f0fff4;
+}
+
+.browser-word-item.added {
+    border-color: #a0aec0;
+    background: #e2e8f0;
+    opacity: 0.7;
+}
+
+.browser-word-item .word-korean {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.browser-word-item .word-korean::after {
+    content: '';
+    width: 18px;
+    height: 18px;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.browser-word-item.selected .word-korean::after {
+    content: '✓';
+    background: #48bb78;
+    border-color: #48bb78;
+    color: white;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.browser-word-item .word-meaning {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.browser-word-item .word-cat {
+    font-size: 0.7rem;
+    color: #999;
+    margin-top: 5px;
+}
+
+.browser-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.primary-btn {
+    flex: 1;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.secondary-btn {
+    flex: 1;
+    padding: 15px;
+    background: #e0e0e0;
+    color: #666;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+#add-feedback {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    display: none;
+}
+
+#add-feedback.success {
+    display: block;
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
 /* 响应式调整 */
 @media (max-width: 600px) {
     .stats-panel {
@@ -983,6 +1195,14 @@ header p {
     .completion-stats {
         flex-direction: column;
         gap: 10px;
+    }
+    
+    .word-browser-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .browser-toolbar {
+        flex-direction: column;
     }
 }
 
