@@ -145,14 +145,61 @@
                     <button class="show-answer-btn" id="show-answer">显示答案</button>
                 </div>
 
-                <!-- 添加单词界面 -->
-                <div id="add-word-form" class="add-form" style="display:none;">
-                    <h3>添加新单词</h3>
-                    <input type="text" id="add-korean" placeholder="韩语单词 (如: 사랑)" />
-                    <input type="text" id="add-meaning" placeholder="中文意思 (如: 爱)" />
-                    <input type="text" id="add-roman" placeholder="罗马音 (可选, 如: sarang)" />
-                    <input type="text" id="add-example" placeholder="例句 (可选)" />
-                    <button id="submit-word">添加单词</button>
+                <!-- 添加单词界面 - 改为从内置词汇选择 -->
+                <div id="add-word-form" class="word-browser" style="display:none;">
+                    <h3>➕ 从词库添加单词</h3>
+                    
+                    <!-- 类别筛选 -->
+                    <div class="category-filter">
+                        <label>筛选类别：</label>
+                        <select id="browser-category">
+                            <option value="all">📚 全部词汇</option>
+                            <option value="basic">⭐ 基础必备</option>
+                            <option value="daily">🏠 日常生活</option>
+                            <option value="food">🍜 食物餐饮</option>
+                            <option value="transport">🚇 交通出行</option>
+                            <option value="shopping">🛍️ 购物消费</option>
+                            <option value="business">💼 工作商务</option>
+                            <option value="education">📚 学校学习</option>
+                            <option value="travel">✈️ 旅游观光</option>
+                            <option value="health">🏥 医疗健康</option>
+                            <option value="entertainment">🎮 娱乐休闲</option>
+                            <option value="emotion">❤️ 情感表达</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 搜索和数量选择 -->
+                    <div class="browser-toolbar">
+                        <input type="text" id="browser-search" placeholder="🔍 搜索单词..." />
+                        <div class="add-count">
+                            <label>批量添加：</label>
+                            <select id="add-count-select">
+                                <option value="10">10个</option>
+                                <option value="20" selected>20个</option>
+                                <option value="50">50个</option>
+                                <option value="all">全部</option>
+                            </select>
+                        </div>
+                        <button id="quick-add-btn" class="quick-add-btn">⚡ 快速添加</button>
+                    </div>
+                    
+                    <!-- 单词列表 -->
+                    <div class="word-list-container">
+                        <div class="word-list-header">
+                            <span>已选: <strong id="selected-count">0</strong></span>
+                            <span>可添加: <strong id="available-count">10000</strong></span>
+                        </div>
+                        <div id="word-browser-list" class="word-browser-list">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 添加到学习 -->
+                    <div class="browser-actions">
+                        <button id="add-selected-to-study" class="primary-btn">📥 添加到学习列表</button>
+                        <button id="clear-selection" class="secondary-btn">清空选择</button>
+                    </div>
+                    
                     <div id="add-feedback"></div>
                 </div>
 
@@ -210,5 +257,6 @@
     </div>
     <script src="vocabulary-extended.js"></script>
 <script src="app.js"></script>
+<script src="app-browser.js"></script>
 </body>
 </html>
