@@ -595,7 +595,8 @@ function renderLetters(containerId, letters) {
             <div class="korean-char">${letter.char}</div>
             <div class="roman">${letter.roman}</div>
         `;
-        card.addEventListener('click', () => playAudio(letter.sound));
+        // 点击时播放韩语字母本身的发音，而不是罗马音
+        card.addEventListener('click', () => playKoreanAudio(letter.char));
         grid.appendChild(card);
     });
 
@@ -728,26 +729,61 @@ function initQuiz() {
     }
 }
 
-// ============ 音频（模拟） ============
-function playAudio(text) {
-    // 使用 Web Speech API
-    if ('speechSynthesis' in window) {
-        // 取消之前的朗读
-        speechSynthesis.cancel();
-        
-        const utterance = new SpeechSynthesisUtterance(text);
-        // 尝试找到韩语语音
-        const voices = speechSynthesis.getVoices();
-        const koreanVoice = voices.find(v => v.lang.includes('ko'));
-        if (koreanVoice) {
-            utterance.voice = koreanVoice;
-        }
-        utterance.lang = 'ko-KR';
-        utterance.rate = 0.8;
-        speechSynthesis.speak(utterance);
-    } else {
+// ============ 音频系统 ============
+// 韩语字母名称映射（用于朗读）
+const koreanLetterNames = {
+    // 辅音名称
+    'ㄱ': '기역', 'ㄴ': '니은', 'ㄷ': '디귿', 'ㄹ': '리을', 'ㅁ': '미음',
+    'ㅂ': '비읍', 'ㅅ': '시옷', 'ㅇ': '이응', 'ㅈ': '지읒', 'ㅊ': '치읓',
+    'ㅋ': '키읔', 'ㅌ': '티읕', 'ㅍ': '피읖', 'ㅎ': '히읗',
+    // 元音名称（直接读即可）
+    'ㅏ': '아', 'ㅑ': '야', 'ㅓ': '어', 'ㅕ': '여', 'ㅗ': '오',
+    'ㅛ': '요', 'ㅜ': '우', 'ㅠ': '유', 'ㅡ': '으', 'ㅣ': '이',
+    'ㅐ': '애', 'ㅒ': '얘', 'ㅔ': '에', 'ㅖ': '예',
+    'ㅘ': '와', 'ㅙ': '왜', 'ㅚ': '외', 'ㅝ': '워', 'ㅞ': '웨', 'ㅟ': '위', 'ㅢ': '의'
+};
+
+// 获取韩语语音（确保使用韩语）
+function getKoreanVoice() {
+    const voices = speechSynthesis.getVoices();
+    // 优先找韩语语音
+    const koVoice = voices.find(v => v.lang === 'ko-KR');
+    if (koVoice) return koVoice;
+    // 备选：包含 'ko' 的语音
+    return voices.find(v => v.lang.includes('ko'));
+}
+
+// 播放韩语音频（用于字母表和单词）
+function playKoreanAudio(text) {
+    if (!('speechSynthesis' in window)) {
         console.log('TTS not supported');
+        return;
     }
+    
+    // 取消之前的朗读
+    speechSynthesis.cancel();
+    
+    // 如果是单个字母，使用字母名称
+    const letterName = koreanLetterNames[text];
+    const utterText = letterName || text;
+    
+    const utterance = new SpeechSynthesisUtterance(utterText);
+    const koreanVoice = getKoreanVoice();
+    
+    if (koreanVoice) {
+        utterance.voice = koreanVoice;
+    }
+    
+    utterance.lang = 'ko-KR';
+    utterance.rate = 0.7; // 稍微慢一点
+    utterance.pitch = 1;
+    
+    speechSynthesis.speak(utterance);
+}
+
+// 兼容旧接口
+function playAudio(text) {
+    playKoreanAudio(text);
 }
 
 // 预加载语音
