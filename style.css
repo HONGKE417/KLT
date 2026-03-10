@@ -590,6 +590,81 @@ header p {
     font-size: 1rem;
 }
 
+/* 类别选择器样式 */
+.category-selector {
+    background: white;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.category-selector label {
+    font-weight: 600;
+    color: #667eea;
+}
+
+.category-selector select {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    background: white;
+}
+
+.category-selector select:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* 词汇级别标签 */
+.word-level {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.word-level.level-1 { background: #e8f5e9; color: #2e7d32; }
+.word-level.level-2 { background: #e3f2fd; color: #1565c0; }
+.word-level.level-3 { background: #fff3e0; color: #ef6c00; }
+.word-level.level-4 { background: #fce4ec; color: #c2185b; }
+.word-level.level-5 { background: #f3e5f5; color: #7b1fa2; }
+
+/* 词汇类别标签 */
+.word-category {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    margin-top: 8px;
+}
+
+/* 批量学习进度 */
+.batch-progress {
+    background: #f0f0f0;
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.batch-progress span {
+    font-size: 0.9rem;
+    color: #666;
+}
+
 /* 响应式 */
 @media (max-width: 600px) {
     .review-header {
@@ -607,6 +682,11 @@ header p {
     
     .word-korean {
         font-size: 2rem;
+    }
+    
+    .category-selector {
+        flex-direction: column;
+        align-items: stretch;
     }
 }
 
