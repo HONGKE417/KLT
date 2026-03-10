@@ -648,6 +648,344 @@ header p {
     to { opacity: 1; transform: translate(-50%, -50%); }
 }
 
+/* 批次信息 */
+.batch-info {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.batch-info span {
+    font-weight: 600;
+    color: #667eea;
+}
+
+/* 音频按钮 */
+.audio-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin: 15px auto;
+    display: block;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.audio-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.audio-btn:active {
+    transform: scale(0.95);
+}
+
+/* 单词类别标签 */
+.word-category-tag {
+    display: inline-block;
+    background: #f0f0f0;
+    color: #666;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-top: 10px;
+}
+
+/* 掌握度指示器 */
+.mastery-indicator {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.mastery-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.mastery-bars {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.mastery-bar {
+    width: 30px;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+.mastery-bar.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.mastery-bar.mastered {
+    background: #48bb78;
+}
+
+/* 统计面板 */
+.stats-panel {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* 每日目标 */
+.daily-goal {
+    background: white;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.daily-goal span {
+    font-size: 0.95rem;
+}
+
+.daily-goal input[type="range"] {
+    flex: 1;
+    min-width: 150px;
+}
+
+.reset-btn {
+    background: #fee;
+    color: #c33;
+    border: 1px solid #fcc;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.reset-btn:hover {
+    background: #fcc;
+}
+
+/* 统计视图 */
+.stats-view {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.stats-view h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #667eea;
+}
+
+.progress-ring {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 30px;
+    position: relative;
+}
+
+.progress-ring svg {
+    transform: rotate(-90deg);
+}
+
+.progress-bg {
+    fill: none;
+    stroke: #e0e0e0;
+    stroke-width: 8;
+}
+
+.progress-bar {
+    fill: none;
+    stroke: url(#gradient);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 283;
+    stroke-dashoffset: 283;
+    transition: stroke-dashoffset 0.5s;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.progress-text span {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.progress-text small {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.category-progress {
+    margin-top: 20px;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.category-icon {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+
+.category-name {
+    flex: 1;
+    font-weight: 500;
+}
+
+.category-bar {
+    width: 100px;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+.category-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s;
+}
+
+.category-count {
+    font-size: 0.85rem;
+    color: #666;
+    min-width: 60px;
+    text-align: right;
+}
+
+/* 搜索框 */
+.search-box {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1rem;
+    margin-bottom: 15px;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+#search-results {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.search-result-item {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-result-item:hover {
+    background: #f8f9fa;
+}
+
+.search-result-korean {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.search-result-meaning {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* 完成界面增强 */
+.completion-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.completion-stats span {
+    font-size: 1rem;
+}
+
+.completion-stats strong {
+    color: #667eea;
+    font-size: 1.2rem;
+}
+
+/* 响应式调整 */
+@media (max-width: 600px) {
+    .stats-panel {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .daily-goal {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .completion-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
 /* 词汇类别标签 */
 .word-category {
     display: inline-block;
