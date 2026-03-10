@@ -743,20 +743,52 @@ const koreanLetterNames = {
     'ㅘ': '와', 'ㅙ': '왜', 'ㅚ': '외', 'ㅝ': '워', 'ㅞ': '웨', 'ㅟ': '위', 'ㅢ': '의'
 };
 
-// 获取韩语语音（确保使用韩语）
-function getKoreanVoice() {
+// 韩语发音提示（当语音不可用时显示）
+const pronunciationTips = {
+    'ㄱ': 'g (轻读)', 'ㄴ': 'n', 'ㄷ': 'd', 'ㄹ': 'r/l', 'ㅁ': 'm',
+    'ㅂ': 'b', 'ㅅ': 's', 'ㅇ': 'ng/无声', 'ㅈ': 'j', 'ㅊ': 'ch',
+    'ㅋ': 'k', 'ㅌ': 't', 'ㅍ': 'p', 'ㅎ': 'h',
+    'ㅏ': 'a', 'ㅑ': 'ya', 'ㅓ': 'eo', 'ㅕ': 'yeo', 'ㅗ': 'o',
+    'ㅛ': 'yo', 'ㅜ': 'u', 'ㅠ': 'yu', 'ㅡ': 'eu', 'ㅣ': 'i',
+    'ㅐ': 'ae', 'ㅒ': 'yae', 'ㅔ': 'e', 'ㅖ': 'ye',
+    'ㅘ': 'wa', 'ㅙ': 'wae', 'ㅚ': 'oe', 'ㅝ': 'wo', 'ㅞ': 'we', 'ㅟ': 'wi', 'ㅢ': 'ui'
+};
+
+// 存储可用的韩语语音
+let koreanVoiceCache = null;
+
+// 预加载语音列表
+function loadVoices() {
     const voices = speechSynthesis.getVoices();
     // 优先找韩语语音
-    const koVoice = voices.find(v => v.lang === 'ko-KR');
-    if (koVoice) return koVoice;
-    // 备选：包含 'ko' 的语音
-    return voices.find(v => v.lang.includes('ko'));
+    koreanVoiceCache = voices.find(v => v.lang === 'ko-KR') || 
+                       voices.find(v => v.lang.includes('ko')) ||
+                       voices.find(v => v.name.toLowerCase().includes('korean'));
+    
+    if (koreanVoiceCache) {
+        console.log('✓ 找到韩语语音:', koreanVoiceCache.name);
+    } else {
+        console.log('⚠ 未找到韩语语音，可用语音:', voices.map(v => `${v.name}(${v.lang})`).slice(0, 5));
+    }
+}
+
+// 浏览器加载语音是异步的，需要监听
+if (typeof speechSynthesis !== 'undefined') {
+    speechSynthesis.onvoiceschanged = loadVoices;
+    // 立即尝试加载
+    setTimeout(loadVoices, 100);
+}
+
+// 获取韩语语音（确保使用韩语）
+function getKoreanVoice() {
+    return koreanVoiceCache;
 }
 
 // 播放韩语音频（用于字母表和单词）
-function playKoreanAudio(text) {
+function playKoreanAudio(text, showTip = true) {
     if (!('speechSynthesis' in window)) {
         console.log('TTS not supported');
+        showPronunciationTip(text);
         return;
     }
     
@@ -772,13 +804,41 @@ function playKoreanAudio(text) {
     
     if (koreanVoice) {
         utterance.voice = koreanVoice;
+        utterance.lang = 'ko-KR';
+    } else {
+        // 没有韩语语音，显示发音提示
+        if (showTip) {
+            showPronunciationTip(text);
+        }
+        utterance.lang = 'ko-KR'; // 仍然尝试用韩语模式
     }
     
-    utterance.lang = 'ko-KR';
-    utterance.rate = 0.7; // 稍微慢一点
+    utterance.rate = 0.6; // 更慢，更清晰
     utterance.pitch = 1;
     
     speechSynthesis.speak(utterance);
+}
+
+// 显示发音提示
+function showPronunciationTip(char) {
+    const tip = pronunciationTips[char];
+    if (!tip) return;
+    
+    // 创建提示元素
+    let tipEl = document.getElementById('pronunciation-tip');
+    if (!tipEl) {
+        tipEl = document.createElement('div');
+        tipEl.id = 'pronunciation-tip';
+        tipEl.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#667eea;color:white;padding:15px 30px;border-radius:10px;font-size:1.2rem;z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.3);';
+        document.body.appendChild(tipEl);
+    }
+    
+    tipEl.textContent = `${char} → [${tip}]`;
+    tipEl.style.display = 'block';
+    
+    setTimeout(() => {
+        tipEl.style.display = 'none';
+    }, 1500);
 }
 
 // 兼容旧接口
