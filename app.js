@@ -103,13 +103,24 @@ class SRS {
         this.words = Storage.get('words', {});
         // 加载自定义单词
         this.customWords = Storage.get('customWords', []);
-        // 合并默认词汇和自定义词汇 (支持10,000+词汇)
+        // 加载学习统计
+        this.stats = Storage.get('learningStats', {
+            todayLearned: 0,
+            todayCorrect: 0,
+            todayTotal: 0,
+            streak: 0,
+            lastStudyDate: null,
+            dailyGoal: 20
+        });
+        // 合并默认词汇和自定义词汇
         this.allWords = [...defaultVocabulary, ...this.customWords];
+        
+        // 检查并更新连续学习天数
+        this.updateStreak();
         
         // 确保所有单词都有category字段
         this.allWords.forEach((word, index) => {
             if (!word.category) {
-                // 根据id分配默认类别
                 if (word.id <= 500) word.category = 'basic';
                 else if (word.id <= 1500) word.category = 'daily';
                 else if (word.id <= 2500) word.category = 'food';
@@ -126,6 +137,93 @@ class SRS {
         });
         
         console.log(`📚 词汇库加载完成: ${this.allWords.length} 个单词`);
+    }
+    
+    // 更新连续学习天数
+    updateStreak() {
+        const today = this.getToday();
+        const lastDate = this.stats.lastStudyDate;
+        
+        if (lastDate === today) {
+            // 今天已经学习过，保持当前streak
+        } else if (lastDate === this.getYesterday()) {
+            // 昨天学过，今天还没学
+            // streak保持不变，等待今天学习后更新
+        } else if (lastDate && lastDate !== today) {
+            // 间隔超过一天，重置streak
+            this.stats.streak = 0;
+            this.stats.todayLearned = 0;
+            this.stats.todayCorrect = 0;
+            this.stats.todayTotal = 0;
+        }
+        
+        this.saveStats();
+    }
+    
+    // 获取昨天日期
+    getYesterday() {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return d.toISOString().split('T')[0];
+    }
+    
+    // 记录学习
+    recordStudy(isCorrect) {
+        const today = this.getToday();
+        
+        if (this.stats.lastStudyDate !== today) {
+            // 新的一天
+            if (this.stats.lastStudyDate === this.getYesterday()) {
+                this.stats.streak++;
+            } else if (!this.stats.lastStudyDate) {
+                this.stats.streak = 1;
+            }
+            this.stats.lastStudyDate = today;
+            this.stats.todayLearned = 0;
+            this.stats.todayCorrect = 0;
+            this.stats.todayTotal = 0;
+        }
+        
+        this.stats.todayTotal++;
+        this.stats.todayLearned++;
+        if (isCorrect) this.stats.todayCorrect++;
+        
+        this.saveStats();
+    }
+    
+    // 保存统计
+    saveStats() {
+        Storage.set('learningStats', this.stats);
+    }
+    
+    // 获取掌握度统计
+    getMasteryStats() {
+        const mastered = Object.values(this.words).filter(w => w.repetitions >= 3).length;
+        const learning = Object.values(this.words).filter(w => w.repetitions > 0 && w.repetitions < 3).length;
+        const total = this.allWords.length;
+        
+        return { mastered, learning, total, percent: Math.round((mastered / total) * 100) };
+    }
+    
+    // 获取类别统计
+    getCategoryStats() {
+        const stats = {};
+        for (const cat of Object.keys(VOCAB_CATEGORIES)) {
+            if (cat === 'all') continue;
+            const catWords = this.allWords.filter(w => w.category === cat);
+            const learned = catWords.filter(w => this.words[w.id] && this.words[w.id].repetitions > 0).length;
+            stats[cat] = { total: catWords.length, learned, percent: Math.round((learned / catWords.length) * 100) };
+        }
+        return stats;
+    }
+    
+    // 搜索已学单词
+    searchLearnedWords(query) {
+        const learnedIds = Object.keys(this.words).map(Number);
+        return this.allWords.filter(w => 
+            learnedIds.includes(w.id) && 
+            (w.korean.includes(query) || w.meaning.includes(query) || w.romanization?.includes(query))
+        );
     }
     
     // 获取今天的日期字符串 (YYYY-MM-DD)
@@ -373,6 +471,17 @@ function updateReviewStats() {
     document.getElementById('due-count').textContent = `待复习: ${stats.due}`;
     document.getElementById('new-count').textContent = `新词: ${stats.newWords}`;
     document.getElementById('total-count').textContent = `总词汇: ${stats.total}`;
+    document.getElementById('streak-count').textContent = `🔥 ${srs.stats.streak}天`;
+    
+    // 更新统计面板
+    const mastery = srs.getMasteryStats();
+    document.getElementById('stat-mastered').textContent = mastery.mastered;
+    document.getElementById('stat-learning').textContent = mastery.learning;
+    document.getElementById('stat-today').textContent = srs.stats.todayLearned;
+    const accuracy = srs.stats.todayTotal > 0 
+        ? Math.round((srs.stats.todayCorrect / srs.stats.todayTotal) * 100) 
+        : 0;
+    document.getElementById('stat-accuracy').textContent = accuracy + '%';
 }
 
 function bindReviewEvents() {
@@ -380,9 +489,17 @@ function bindReviewEvents() {
     document.getElementById('mode-review').addEventListener('click', () => switchMode('review'));
     document.getElementById('mode-new').addEventListener('click', () => switchMode('new'));
     document.getElementById('mode-add').addEventListener('click', () => switchMode('add'));
+    document.getElementById('mode-stats').addEventListener('click', () => switchMode('stats'));
     
     // 显示答案
     document.getElementById('show-answer').addEventListener('click', showAnswer);
+    
+    // 播放单词音频
+    document.getElementById('play-word-audio').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const word = reviewQueue[currentReviewIndex];
+        if (word) playKoreanAudio(word.korean);
+    });
     
     // 显示提示
     document.getElementById('show-hint').addEventListener('click', () => {
@@ -404,6 +521,64 @@ function bindReviewEvents() {
     document.getElementById('continue-study').addEventListener('click', () => {
         switchMode('new');
     });
+    
+    // 每日目标滑块
+    const goalSlider = document.getElementById('goal-slider');
+    if (goalSlider) {
+        goalSlider.addEventListener('input', (e) => {
+            const goal = e.target.value;
+            document.getElementById('goal-display').textContent = goal;
+            srs.stats.dailyGoal = parseInt(goal);
+            srs.saveStats();
+        });
+        // 加载保存的目标
+        goalSlider.value = srs.stats.dailyGoal || 20;
+        document.getElementById('goal-display').textContent = srs.stats.dailyGoal || 20;
+    }
+    
+    // 重置进度按钮
+    document.getElementById('reset-progress').addEventListener('click', () => {
+        if (confirm('确定要重置所有学习进度吗？这将清除所有学习记录。')) {
+            srs.reset();
+            srs.stats = { todayLearned: 0, todayCorrect: 0, todayTotal: 0, streak: 0, lastStudyDate: null, dailyGoal: 20 };
+            srs.saveStats();
+            updateReviewStats();
+            alert('学习进度已重置');
+        }
+    });
+    
+    // 搜索功能
+    const searchInput = document.getElementById('word-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            if (query.length > 0) {
+                const results = srs.searchLearnedWords(query);
+                displaySearchResults(results);
+            } else {
+                document.getElementById('search-results').innerHTML = '';
+            }
+        });
+    }
+}
+
+// 显示搜索结果
+function displaySearchResults(results) {
+    const container = document.getElementById('search-results');
+    if (results.length === 0) {
+        container.innerHTML = '<div class="search-result-item">没有找到匹配的单词</div>';
+        return;
+    }
+    
+    container.innerHTML = results.map(w => `
+        <div class="search-result-item">
+            <div>
+                <div class="search-result-korean">${w.korean}</div>
+                <div class="search-result-meaning">${w.meaning}</div>
+            </div>
+            <button onclick="playKoreanAudio('${w.korean}')" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">🔊</button>
+        </div>
+    `).join('');
 }
 
 function switchMode(mode) {
@@ -414,13 +589,54 @@ function switchMode(mode) {
     document.getElementById(`mode-${mode}`).classList.add('active');
     
     // 显示/隐藏相应界面
-    document.getElementById('review-card').style.display = mode === 'add' ? 'none' : 'block';
+    document.getElementById('review-card').style.display = (mode === 'add' || mode === 'stats') ? 'none' : 'block';
     document.getElementById('add-word-form').style.display = mode === 'add' ? 'block' : 'none';
+    document.getElementById('stats-view').style.display = mode === 'stats' ? 'block' : 'none';
     document.getElementById('review-complete').style.display = 'none';
     
-    if (mode !== 'add') {
+    if (mode === 'stats') {
+        showStats();
+    } else if (mode !== 'add') {
         loadReviewQueue();
     }
+}
+
+// 显示统计信息
+function showStats() {
+    const mastery = srs.getMasteryStats();
+    const catStats = srs.getCategoryStats();
+    
+    // 更新统计卡片
+    document.getElementById('stat-mastered').textContent = mastery.mastered;
+    document.getElementById('stat-learning').textContent = mastery.learning;
+    document.getElementById('stat-today').textContent = srs.stats.todayLearned;
+    const accuracy = srs.stats.todayTotal > 0 
+        ? Math.round((srs.stats.todayCorrect / srs.stats.todayTotal) * 100) 
+        : 0;
+    document.getElementById('stat-accuracy').textContent = accuracy + '%';
+    
+    // 更新进度环
+    const circle = document.getElementById('progress-circle');
+    const percent = mastery.percent;
+    const offset = 283 - (percent / 100) * 283;
+    circle.style.strokeDashoffset = offset;
+    document.getElementById('progress-percent').textContent = percent + '%';
+    
+    // 更新类别进度
+    const catContainer = document.getElementById('category-progress');
+    catContainer.innerHTML = Object.entries(catStats).map(([cat, stat]) => {
+        const catInfo = VOCAB_CATEGORIES[cat];
+        return `
+            <div class="category-item">
+                <span class="category-icon">${catInfo?.icon || '📝'}</span>
+                <span class="category-name">${catInfo?.name || cat}</span>
+                <div class="category-bar">
+                    <div class="category-fill" style="width: ${stat.percent}%"></div>
+                </div>
+                <span class="category-count">${stat.learned}/${stat.total}</span>
+            </div>
+        `;
+    }).join('');
 }
 
 function loadReviewQueue() {
@@ -458,9 +674,11 @@ function showWord() {
         srs.initWord(word.id);
     }
     
-    // 更新进度条
+    // 更新进度条和位置
     const progress = ((currentReviewIndex) / reviewQueue.length) * 100;
     document.getElementById('review-progress').style.width = `${progress}%`;
+    document.getElementById('current-pos').textContent = currentReviewIndex + 1;
+    document.getElementById('total-pos').textContent = reviewQueue.length;
     
     // 显示单词
     document.getElementById('study-korean').textContent = word.korean;
@@ -469,11 +687,34 @@ function showWord() {
     document.getElementById('study-example').textContent = word.example || '';
     document.getElementById('study-hint').textContent = word.romanization || '';
     
+    // 显示类别标签
+    const catInfo = VOCAB_CATEGORIES[word.category] || { name: '其他', icon: '📝' };
+    document.getElementById('word-cat').textContent = `${catInfo.icon} ${catInfo.name}`;
+    
+    // 更新掌握度指示器
+    const wordRecord = srs.words[word.id];
+    const masteryBars = document.querySelectorAll('.mastery-bar');
+    masteryBars.forEach((bar, index) => {
+        bar.classList.remove('active', 'mastered');
+        if (wordRecord) {
+            if (index < wordRecord.repetitions) {
+                if (wordRecord.repetitions >= 4) {
+                    bar.classList.add('mastered');
+                } else {
+                    bar.classList.add('active');
+                }
+            }
+        }
+    });
+    
     // 重置显示状态
     document.getElementById('word-answer').style.display = 'none';
     document.getElementById('study-hint').style.display = 'none';
     document.getElementById('show-answer').style.display = 'block';
     document.getElementById('difficulty-btns').style.display = 'none';
+    
+    // 自动播放单词发音（可选）
+    // playKoreanAudio(word.korean, false);
 }
 
 function showAnswer() {
@@ -490,6 +731,9 @@ function handleReview(quality) {
     const result = srs.review(word.id, quality);
     console.log(`Reviewed ${word.korean}: interval=${result.interval}days, next=${result.nextReview}`);
     
+    // 记录学习统计（quality >= 3 算正确）
+    srs.recordStudy(quality >= 3);
+    
     // 下一个
     currentReviewIndex++;
     
@@ -505,6 +749,21 @@ function showComplete() {
     document.getElementById('review-card').style.display = 'none';
     document.getElementById('review-complete').style.display = 'block';
     document.getElementById('review-progress').style.width = '100%';
+    
+    // 显示完成统计
+    document.getElementById('today-learned').textContent = srs.stats.todayLearned;
+    const accuracy = srs.stats.todayTotal > 0 
+        ? Math.round((srs.stats.todayCorrect / srs.stats.todayTotal) * 100) 
+        : 0;
+    document.getElementById('today-accuracy').textContent = accuracy + '%';
+    
+    // 检查是否完成每日目标
+    const goal = srs.stats.dailyGoal || 20;
+    const message = srs.stats.todayLearned >= goal 
+        ? `🎉 恭喜！已完成今日目标 ${goal} 词！` 
+        : `已完成 ${srs.stats.todayLearned}/${goal} 词，继续加油！`;
+    document.getElementById('completion-message').textContent = message;
+    
     updateReviewStats();
 }
 
