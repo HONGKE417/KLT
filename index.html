@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KLT - Korean Learning Tool</title>
+    <title>KLT - Korean Learning Tool | 韩语学习</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,6 +16,7 @@
         <nav class="tabs">
             <button class="tab-btn active" data-tab="hangul">한글字母</button>
             <button class="tab-btn" data-tab="vocab">词汇</button>
+            <button class="tab-btn" data-tab="review">背单词</button>
             <button class="tab-btn" data-tab="practice">练习</button>
         </nav>
 
@@ -54,6 +55,68 @@
                         <span id="card-counter">1/10</span>
                         <button id="next-card">→</button>
                     </div>
+                </div>
+            </section>
+
+            <!-- 背单词 (SM-2间隔重复) -->
+            <section id="review" class="tab-content">
+                <div class="review-header">
+                    <h2>🧠 背单词</h2>
+                    <div class="stats">
+                        <span id="due-count">待复习: 0</span>
+                        <span id="new-count">新词: 0</span>
+                        <span id="total-count">总词汇: 0</span>
+                    </div>
+                </div>
+                
+                <div class="review-mode-selector">
+                    <button id="mode-review" class="mode-btn active">📚 今日复习</button>
+                    <button id="mode-new" class="mode-btn">🆕 学习新词</button>
+                    <button id="mode-add" class="mode-btn">➕ 添加单词</button>
+                </div>
+
+                <!-- 复习界面 -->
+                <div id="review-card" class="review-container">
+                    <div class="progress-bar">
+                        <div id="review-progress" class="progress-fill"></div>
+                    </div>
+                    <div class="word-card" id="study-card">
+                        <div class="word-front">
+                            <span class="word-korean" id="study-korean">안녕하세요</span>
+                            <button class="hint-btn" id="show-hint">💡 提示</button>
+                            <div class="word-hint" id="study-hint" style="display:none;">an-nyeong-ha-se-yo</div>
+                        </div>
+                        <div class="word-back" id="word-answer" style="display:none;">
+                            <span class="word-meaning" id="study-meaning">你好</span>
+                            <span class="word-roman" id="study-roman">annyeonghaseyo</span>
+                            <span class="word-example" id="study-example">안녕하세요! 만나서 반가워요.</span>
+                        </div>
+                    </div>
+                    <div class="difficulty-buttons" id="difficulty-btns" style="display:none;">
+                        <button class="diff-btn again" data-level="0">😫 忘了</button>
+                        <button class="diff-btn hard" data-level="3">🤔 困难</button>
+                        <button class="diff-btn good" data-level="4">😊 良好</button>
+                        <button class="diff-btn easy" data-level="5">🤩 简单</button>
+                    </div>
+                    <button class="show-answer-btn" id="show-answer">显示答案</button>
+                </div>
+
+                <!-- 添加单词界面 -->
+                <div id="add-word-form" class="add-form" style="display:none;">
+                    <h3>添加新单词</h3>
+                    <input type="text" id="add-korean" placeholder="韩语单词 (如: 사랑)" />
+                    <input type="text" id="add-meaning" placeholder="中文意思 (如: 爱)" />
+                    <input type="text" id="add-roman" placeholder="罗马音 (可选, 如: sarang)" />
+                    <input type="text" id="add-example" placeholder="例句 (可选)" />
+                    <button id="submit-word">添加单词</button>
+                    <div id="add-feedback"></div>
+                </div>
+
+                <!-- 完成界面 -->
+                <div id="review-complete" class="complete-message" style="display:none;">
+                    <h3>🎉 今日任务完成！</h3>
+                    <p>明天再来复习吧</p>
+                    <button id="continue-study">继续学习新词</button>
                 </div>
             </section>
 
